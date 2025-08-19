@@ -197,6 +197,7 @@ export default function TaskDashboard({ initialTasks, categories, user }: TaskDa
           <div>
             <h1 className="text-3xl font-bold text-foreground">Task Manager</h1>
             <p className="text-muted-foreground">Stay organized and productive</p>
+            <p className="text-xs text-muted-foreground/70 mt-1">Created by Tahsina Amrin Neha</p>
           </div>
         </div>
 
