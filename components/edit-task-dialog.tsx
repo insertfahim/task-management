@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -22,8 +21,6 @@ interface Task {
   title: string
   description: string | null
   completed: boolean
-  priority: "low" | "medium" | "high"
-  due_date: string | null
   category_id: string | null
   created_at: string
   categories?: {
@@ -44,17 +41,13 @@ interface EditTaskDialogProps {
 export default function EditTaskDialog({ task, categories, isOpen, onClose, onUpdate }: EditTaskDialogProps) {
   const [title, setTitle] = useState(task.title)
   const [description, setDescription] = useState(task.description || "")
-  const [priority, setPriority] = useState<"low" | "medium" | "high">(task.priority)
   const [categoryId, setCategoryId] = useState<string>(task.category_id || "none")
-  const [dueDate, setDueDate] = useState(task.due_date ? task.due_date.split("T")[0] : "")
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     setTitle(task.title)
     setDescription(task.description || "")
-    setPriority(task.priority)
     setCategoryId(task.category_id || "none")
-    setDueDate(task.due_date ? task.due_date.split("T")[0] : "")
   }, [task])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -66,9 +59,7 @@ export default function EditTaskDialog({ task, categories, isOpen, onClose, onUp
       const updatedTask = await updateTask(task.id, {
         title: title.trim(),
         description: description.trim() || null,
-        priority,
         category_id: categoryId === "none" ? null : categoryId,
-        due_date: dueDate || null,
       })
 
       if (updatedTask) {
@@ -112,52 +103,31 @@ export default function EditTaskDialog({ task, categories, isOpen, onClose, onUp
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="priority">Priority</Label>
-              <Select value={priority} onValueChange={(value: "low" | "medium" | "high") => setPriority(value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="low">Low</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="category">Category</Label>
-              <Select value={categoryId} onValueChange={setCategoryId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">No category</SelectItem>
-                  {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: category.color }} />
-                        {category.name}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
           <div className="space-y-2">
-            <Label htmlFor="dueDate">Due Date</Label>
-            <Input id="dueDate" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+            <Label htmlFor="category">Category</Label>
+            <Select value={categoryId} onValueChange={setCategoryId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">No Category</SelectItem>
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: category.color }} />
+                      {category.name}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
-          <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={onClose}>
+          <div className="flex justify-end gap-3 pt-4">
+            <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting || !title.trim()} className="bg-blue-600 hover:bg-blue-700">
+            <Button type="submit" disabled={isSubmitting || !title.trim()}>
               {isSubmitting ? "Updating..." : "Update Task"}
             </Button>
           </div>

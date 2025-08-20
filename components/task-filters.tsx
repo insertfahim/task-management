@@ -14,8 +14,6 @@ interface Category {
 interface Filters {
   status: string
   category: string
-  priority: string
-  dueDateFilter: string
 }
 
 interface TaskFiltersProps {
@@ -45,17 +43,17 @@ export default function TaskFilters({
     onFiltersChange({
       status: "all",
       category: "all",
-      priority: "all",
-      dueDateFilter: "all",
     })
   }
 
-  const hasActiveFilters = Object.values(filters).some((value) => value !== "all")
+  const toggleSortOrder = () => {
+    onSortOrderChange(sortOrder === "asc" ? "desc" : "asc")
+  }
 
   return (
     <Card>
-      <CardContent className="p-4">
-        <div className="flex items-center gap-4 flex-wrap">
+      <CardContent className="pt-6">
+        <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm font-medium">Filters:</span>
@@ -63,78 +61,56 @@ export default function TaskFilters({
 
           {/* Status Filter */}
           <Select value={filters.status} onValueChange={(value) => handleFilterChange("status", value)}>
-            <SelectTrigger className="w-32">
-              <SelectValue />
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="all">All Tasks</SelectItem>
               <SelectItem value="pending">Pending</SelectItem>
               <SelectItem value="completed">Completed</SelectItem>
             </SelectContent>
           </Select>
 
-          {/* Priority Filter */}
-          <Select value={filters.priority} onValueChange={(value) => handleFilterChange("priority", value)}>
-            <SelectTrigger className="w-32">
-              <SelectValue />
+          {/* Category Filter */}
+          <Select value={filters.category} onValueChange={(value) => handleFilterChange("category", value)}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Priority</SelectItem>
-              <SelectItem value="high">High</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="low">Low</SelectItem>
+              <SelectItem value="all">All Categories</SelectItem>
+              {categories.map((category) => (
+                <SelectItem key={category.id} value={category.id}>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: category.color }} />
+                    {category.name}
+                  </div>
+                </SelectItem>
+              ))}
+              <SelectItem value="none">Uncategorized</SelectItem>
             </SelectContent>
           </Select>
 
-          {/* Due Date Filter */}
-          <Select value={filters.dueDateFilter} onValueChange={(value) => handleFilterChange("dueDateFilter", value)}>
-            <SelectTrigger className="w-36">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Dates</SelectItem>
-              <SelectItem value="overdue">Overdue</SelectItem>
-              <SelectItem value="today">Due Today</SelectItem>
-              <SelectItem value="week">This Week</SelectItem>
-              <SelectItem value="month">This Month</SelectItem>
-              <SelectItem value="none">No Due Date</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Sort by:</span>
+            <Select value={sortBy} onValueChange={onSortByChange}>
+              <SelectTrigger className="w-[130px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="created_at">Created</SelectItem>
+                <SelectItem value="title">Title</SelectItem>
+              </SelectContent>
+            </Select>
 
-          <div className="flex items-center gap-2 ml-4">
-            <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Sort:</span>
+            <Button variant="outline" size="sm" onClick={toggleSortOrder} className="px-2">
+              {sortOrder === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />}
+              <ArrowUpDown className="h-4 w-4 ml-1" />
+            </Button>
           </div>
 
-          {/* Sort By */}
-          <Select value={sortBy} onValueChange={onSortByChange}>
-            <SelectTrigger className="w-36">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="created_at">Date Created</SelectItem>
-              <SelectItem value="due_date">Due Date</SelectItem>
-              <SelectItem value="priority">Priority</SelectItem>
-              <SelectItem value="title">Title</SelectItem>
-            </SelectContent>
-          </Select>
-
-          {/* Sort Order */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onSortOrderChange(sortOrder === "asc" ? "desc" : "asc")}
-            className="px-3"
-          >
-            {sortOrder === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />}
+          <Button variant="outline" size="sm" onClick={clearFilters}>
+            Clear
           </Button>
-
-          {/* Clear Filters */}
-          {hasActiveFilters && (
-            <Button variant="ghost" size="sm" onClick={clearFilters} className="text-muted-foreground">
-              Clear Filters
-            </Button>
-          )}
         </div>
       </CardContent>
     </Card>

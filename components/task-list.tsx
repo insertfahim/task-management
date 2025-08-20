@@ -10,8 +10,6 @@ interface Task {
   title: string
   description: string | null
   completed: boolean
-  priority: "low" | "medium" | "high"
-  due_date: string | null
   category_id: string | null
   created_at: string
   categories?: {
@@ -32,8 +30,6 @@ interface TaskListProps {
   categories: Category[]
   onTaskUpdate: (task: Task) => void
   onTaskDelete: (taskId: string) => void
-  selectedTasks?: string[]
-  onSelectedTasksChange?: (taskIds: string[]) => void
 }
 
 export default function TaskList({
@@ -41,15 +37,13 @@ export default function TaskList({
   categories,
   onTaskUpdate,
   onTaskDelete,
-  selectedTasks = [],
-  onSelectedTasksChange,
 }: TaskListProps) {
   const [searchTerm, setSearchTerm] = useState("")
 
   const filteredTasks = tasks.filter(
     (task) =>
       task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      task.description?.toLowerCase().includes(searchTerm.toLowerCase()),
+      task.description?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   if (tasks.length === 0) {
@@ -91,16 +85,6 @@ export default function TaskList({
               categories={categories}
               onUpdate={onTaskUpdate}
               onDelete={onTaskDelete}
-              isSelected={selectedTasks.includes(task.id)}
-              onSelectionChange={(selected) => {
-                if (onSelectedTasksChange) {
-                  if (selected) {
-                    onSelectedTasksChange([...selectedTasks, task.id])
-                  } else {
-                    onSelectedTasksChange(selectedTasks.filter((id) => id !== task.id))
-                  }
-                }
-              }}
             />
           ))
         )}
