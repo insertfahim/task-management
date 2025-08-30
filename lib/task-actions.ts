@@ -7,6 +7,8 @@ interface CreateTaskData {
     title: string;
     description: string | null;
     category_id: string | null;
+    priority: "low" | "medium" | "high";
+    due_date: string | null;
 }
 
 interface UpdateTaskData {
@@ -14,6 +16,8 @@ interface UpdateTaskData {
     description?: string | null;
     completed?: boolean;
     category_id?: string | null;
+    priority?: "low" | "medium" | "high";
+    due_date?: string | null;
 }
 
 export async function createTask(data: CreateTaskData) {

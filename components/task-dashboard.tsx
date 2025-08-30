@@ -3,12 +3,16 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckSquare, Plus, LogOut } from "lucide-react";
+import { CheckSquare, Plus, LogOut, Download } from "lucide-react";
 import { signOut } from "@/lib/actions";
-import TaskList from "@/components/task-list";
+import TaskList from "@/components/task-list-enhanced";
 import AddTaskDialog from "@/components/add-task-dialog";
 import CategoryManager from "@/components/category-manager";
+import NotificationSystem from "@/components/notification-system";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Badge } from "@/components/ui/badge";
+import { exportTasksToCSV } from "@/lib/export-utils";
+import { downloadCSV } from "@/lib/client-utils";
 
 interface Task {
     id: string;
@@ -16,6 +20,8 @@ interface Task {
     description: string | null;
     completed: boolean;
     category_id: string | null;
+    priority: "low" | "medium" | "high";
+    due_date: string | null;
     created_at: string;
     categories?: {
         id: string;
@@ -71,6 +77,18 @@ export default function TaskDashboard({
         setCategoriesList(updatedCategories);
     };
 
+    const handleExportCSV = async () => {
+        try {
+            const csvContent = await exportTasksToCSV(tasks);
+            downloadCSV(
+                csvContent,
+                `tasks-${new Date().toISOString().split("T")[0]}.csv`
+            );
+        } catch (error) {
+            console.error("Failed to export tasks:", error);
+        }
+    };
+
     return (
         <div className="container mx-auto px-4 py-8 max-w-6xl">
             {/* Header */}
@@ -91,6 +109,8 @@ export default function TaskDashboard({
                 </div>
 
                 <div className="flex items-center gap-4">
+                    <NotificationSystem tasks={tasks} />
+                    <ThemeToggle />
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         {user.email}
                     </div>
@@ -157,6 +177,15 @@ export default function TaskDashboard({
                             <div className="flex items-center justify-between">
                                 <CardTitle>Your Tasks</CardTitle>
                                 <div className="flex gap-2">
+                                    <Button
+                                        onClick={handleExportCSV}
+                                        variant="outline"
+                                        size="sm"
+                                        disabled={tasks.length === 0}
+                                    >
+                                        <Download className="h-4 w-4 mr-2" />
+                                        Export CSV
+                                    </Button>
                                     <Button
                                         onClick={() =>
                                             setIsCategoryManagerOpen(true)

@@ -15,6 +15,8 @@ interface Task {
     description: string | null;
     completed: boolean;
     category_id: string | null;
+    priority: "low" | "medium" | "high";
+    due_date: string | null;
     created_at: string;
     categories?: {
         id: string;
@@ -133,23 +135,73 @@ export default function TaskItem({
                                 </div>
                             </div>
 
-                            {task.categories && (
-                                <div className="flex items-center gap-2 mt-3">
-                                    <Badge
-                                        variant="outline"
-                                        style={{
-                                            borderColor: task.categories.color,
-                                        }}
-                                    >
-                                        <div
-                                            className="w-2 h-2 rounded-full mr-1"
+                            {(task.categories ||
+                                task.priority ||
+                                task.due_date) && (
+                                <div className="flex items-center gap-2 mt-3 flex-wrap">
+                                    {task.categories && (
+                                        <Badge
+                                            variant="outline"
                                             style={{
-                                                backgroundColor:
+                                                borderColor:
                                                     task.categories.color,
                                             }}
+                                        >
+                                            <div
+                                                className="w-2 h-2 rounded-full mr-1"
+                                                style={{
+                                                    backgroundColor:
+                                                        task.categories.color,
+                                                }}
+                                            />
+                                            {task.categories.name}
+                                        </Badge>
+                                    )}
+
+                                    <Badge
+                                        variant="outline"
+                                        className={`${
+                                            task.priority === "high"
+                                                ? "border-red-500 text-red-700"
+                                                : task.priority === "medium"
+                                                ? "border-yellow-500 text-yellow-700"
+                                                : "border-green-500 text-green-700"
+                                        }`}
+                                    >
+                                        <div
+                                            className={`w-2 h-2 rounded-full mr-1 ${
+                                                task.priority === "high"
+                                                    ? "bg-red-500"
+                                                    : task.priority === "medium"
+                                                    ? "bg-yellow-500"
+                                                    : "bg-green-500"
+                                            }`}
                                         />
-                                        {task.categories.name}
+                                        {task.priority.charAt(0).toUpperCase() +
+                                            task.priority.slice(1)}
                                     </Badge>
+
+                                    {task.due_date && (
+                                        <Badge
+                                            variant="outline"
+                                            className={`${
+                                                new Date(task.due_date) <
+                                                    new Date() &&
+                                                !task.completed
+                                                    ? "border-red-500 text-red-700"
+                                                    : "border-blue-500 text-blue-700"
+                                            }`}
+                                        >
+                                            📅{" "}
+                                            {new Date(
+                                                task.due_date
+                                            ).toLocaleDateString()}
+                                            {new Date(task.due_date) <
+                                                new Date() &&
+                                                !task.completed &&
+                                                " (Overdue)"}
+                                        </Badge>
+                                    )}
                                 </div>
                             )}
                         </div>
