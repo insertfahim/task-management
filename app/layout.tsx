@@ -27,8 +27,14 @@ html {
 }
         `}</style>
       </head>
-      <body>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+      <body suppressHydrationWarning>
+        <ThemeProvider 
+          attribute="class" 
+          defaultTheme="system" 
+          enableSystem 
+          disableTransitionOnChange
+          storageKey="task-manager-theme"
+        >
           {children}
         </ThemeProvider>
       </body>
