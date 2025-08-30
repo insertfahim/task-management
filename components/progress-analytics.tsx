@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { TrendingUp, Calendar, Target, Clock } from "lucide-react"
+import { useStableDates } from "@/lib/use-client-date"
 
 interface Task {
   id: string
@@ -33,6 +34,8 @@ interface ProgressAnalyticsProps {
 }
 
 export default function ProgressAnalytics({ tasks, categories }: ProgressAnalyticsProps) {
+  const { today, weekAgo } = useStableDates()
+  
   const totalTasks = tasks.length
   const completedTasks = tasks.filter((task) => task.completed).length
   const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
@@ -46,13 +49,11 @@ export default function ProgressAnalytics({ tasks, categories }: ProgressAnalyti
   const mediumCompleted = mediumPriorityTasks.filter((task) => task.completed).length
   const lowCompleted = lowPriorityTasks.filter((task) => task.completed).length
 
-  // Due date analysis
-  const now = new Date()
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  const overdueTasks = tasks.filter((task) => task.due_date && new Date(task.due_date) < today && !task.completed)
-  const dueTodayTasks = tasks.filter(
+  // Due date analysis - only calculate if dates are available
+  const overdueTasks = today ? tasks.filter((task) => task.due_date && new Date(task.due_date) < today && !task.completed) : []
+  const dueTodayTasks = today ? tasks.filter(
     (task) => task.due_date && new Date(task.due_date).toDateString() === today.toDateString(),
-  )
+  ) : []
 
   // Category breakdown
   const categoryStats = categories.map((category) => {
@@ -69,8 +70,7 @@ export default function ProgressAnalytics({ tasks, categories }: ProgressAnalyti
   })
 
   // Recent activity (tasks created in last 7 days)
-  const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-  const recentTasks = tasks.filter((task) => new Date(task.created_at) >= weekAgo)
+  const recentTasks = weekAgo ? tasks.filter((task) => new Date(task.created_at) >= weekAgo) : []
 
   return (
     <div className="space-y-6">

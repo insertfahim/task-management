@@ -18,6 +18,7 @@ import NotificationSettings from "@/components/notification-settings"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { useStableDates } from "@/lib/use-client-date"
 
 interface Task {
   id: string
@@ -57,6 +58,9 @@ export default function TaskDashboard({ initialTasks, categories, user }: TaskDa
   const [isExportOpen, setIsExportOpen] = useState(false)
   const [isNotificationSettingsOpen, setIsNotificationSettingsOpen] = useState(false)
   const [selectedTasks, setSelectedTasks] = useState<string[]>([])
+  
+  // Get stable dates that won't cause hydration issues
+  const { today, weekFromNow, monthFromNow } = useStableDates()
 
   // Filter and sort states
   const [filters, setFilters] = useState({
@@ -93,12 +97,7 @@ export default function TaskDashboard({ initialTasks, categories, user }: TaskDa
     }
 
     // Due date filter
-    if (filters.dueDateFilter !== "all") {
-      const now = new Date()
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-      const weekFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000)
-      const monthFromNow = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000)
-
+    if (filters.dueDateFilter !== "all" && today && weekFromNow && monthFromNow) {
       filteredTasks = filteredTasks.filter((task) => {
         if (!task.due_date) return filters.dueDateFilter === "none"
         const dueDate = new Date(task.due_date)

@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Bell, BellOff, X, Clock, AlertTriangle } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { useStableDates } from "@/lib/use-client-date"
 
 interface Task {
   id: string
@@ -40,6 +41,7 @@ export default function NotificationSystem({ tasks }: NotificationSystemProps) {
   const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(false)
   const [isNotificationsPanelOpen, setIsNotificationsPanelOpen] = useState(false)
   const [hasPermission, setHasPermission] = useState(false)
+  const { today, now } = useStableDates()
 
   useEffect(() => {
     // Check if browser supports notifications
@@ -49,9 +51,9 @@ export default function NotificationSystem({ tasks }: NotificationSystemProps) {
   }, [])
 
   useEffect(() => {
-    // Generate notifications based on tasks
-    const now = new Date()
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    // Generate notifications based on tasks only when dates are available
+    if (!today || !now) return
+    
     const newNotifications: Notification[] = []
 
     tasks.forEach((task) => {
@@ -70,8 +72,9 @@ export default function NotificationSystem({ tasks }: NotificationSystemProps) {
           timestamp: now,
         })
       }
-      // Due today
-      else if (dueDateOnly.getTime() === today.getTime()) {
+
+      // Due today tasks
+      if (dueDateOnly.getTime() === today.getTime()) {
         newNotifications.push({
           id: `due-today-${task.id}`,
           type: "due_today",
@@ -96,7 +99,7 @@ export default function NotificationSystem({ tasks }: NotificationSystemProps) {
         }
       })
     }
-  }, [tasks, isNotificationsEnabled, hasPermission])
+  }, [tasks, today, now, isNotificationsEnabled, hasPermission])
 
   const requestNotificationPermission = async () => {
     if ("Notification" in window) {

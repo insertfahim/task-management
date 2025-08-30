@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
@@ -28,14 +28,33 @@ export default function NotificationSettings({ isOpen, onClose }: NotificationSe
     overdueReminders: true,
     reminderHours: 24,
   })
+  const [isClient, setIsClient] = useState(false)
+
+  // Ensure this only runs on the client side
+  useEffect(() => {
+    setIsClient(true)
+    // Load preferences from localStorage on client side
+    if (typeof window !== 'undefined') {
+      const savedPreferences = localStorage.getItem("notificationPreferences")
+      if (savedPreferences) {
+        try {
+          setPreferences(JSON.parse(savedPreferences))
+        } catch (error) {
+          console.error('Failed to parse notification preferences:', error)
+        }
+      }
+    }
+  }, [])
 
   const handlePreferenceChange = (key: keyof NotificationPreferences, value: boolean | number) => {
     setPreferences((prev) => ({ ...prev, [key]: value }))
   }
 
   const handleSave = () => {
-    // Save preferences to localStorage or send to server
-    localStorage.setItem("notificationPreferences", JSON.stringify(preferences))
+    // Save preferences to localStorage only on client side
+    if (isClient && typeof window !== 'undefined') {
+      localStorage.setItem("notificationPreferences", JSON.stringify(preferences))
+    }
     onClose()
   }
 
